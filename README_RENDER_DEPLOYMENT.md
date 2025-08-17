@@ -11,7 +11,7 @@
 4. Cấu hình như sau:
    - **Name**: `facebook-messenger-bot`
    - **Environment**: `Node`
-   - **Build Command**: `npm install && npm run build`
+   - **Build Command**: `npm install && npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist`
    - **Start Command**: `npm start`
    - **Plan**: Free (hoặc trả phí nếu cần)
 
