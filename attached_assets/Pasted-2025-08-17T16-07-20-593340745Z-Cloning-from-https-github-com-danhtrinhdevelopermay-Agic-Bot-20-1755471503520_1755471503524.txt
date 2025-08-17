@@ -1,0 +1,34 @@
+2025-08-17T16:07:20.593340745Z ==> Cloning from https://github.com/danhtrinhdevelopermay/Agic-Bot
+2025-08-17T16:07:21.494269243Z ==> Checking out commit 4670b65bc9bc646e26eb0f751d9ba8c3bc17d9c4 in branch main
+2025-08-17T16:07:23.658513273Z ==> Using Node.js version 22.16.0 (default)
+2025-08-17T16:07:23.683645639Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-08-17T16:07:25.459599862Z ==> Running build command 'npm ci && node build.cjs'...
+2025-08-17T16:07:30.791060716Z 
+2025-08-17T16:07:30.791087977Z added 394 packages, and audited 395 packages in 5s
+2025-08-17T16:07:30.791100847Z 
+2025-08-17T16:07:30.791115618Z 55 packages are looking for funding
+2025-08-17T16:07:30.791127138Z   run `npm fund` for details
+2025-08-17T16:07:30.793104698Z 
+2025-08-17T16:07:30.793117849Z 3 low severity vulnerabilities
+2025-08-17T16:07:30.793121459Z 
+2025-08-17T16:07:30.793125109Z To address all issues, run:
+2025-08-17T16:07:30.793128639Z   npm audit fix
+2025-08-17T16:07:30.793132239Z 
+2025-08-17T16:07:30.793135819Z Run `npm audit` for details.
+2025-08-17T16:07:30.970291348Z Starting production build...
+2025-08-17T16:07:30.970454272Z Building client...
+2025-08-17T16:07:41.699597031Z failed to load config from /opt/render/project/src/vite.config.ts
+2025-08-17T16:07:41.699862637Z error during build:
+2025-08-17T16:07:41.699877187Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'vite' imported from /opt/render/project/src/node_modules/.vite-temp/vite.config.ts.timestamp-1755446861696-60ea0276c25ec.mjs
+2025-08-17T16:07:41.699882537Z     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:256:9)
+2025-08-17T16:07:41.699886837Z     at packageResolve (node:internal/modules/esm/resolve:768:81)
+2025-08-17T16:07:41.699890257Z     at moduleResolve (node:internal/modules/esm/resolve:854:18)
+2025-08-17T16:07:41.699893657Z     at defaultResolve (node:internal/modules/esm/resolve:984:11)
+2025-08-17T16:07:41.699897667Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:780:12)
+2025-08-17T16:07:41.699901217Z     at #cachedDefaultResolve (node:internal/modules/esm/loader:704:25)
+2025-08-17T16:07:41.699907427Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:687:38)
+2025-08-17T16:07:41.699911187Z     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:305:38)
+2025-08-17T16:07:41.699914778Z     at ModuleJob._link (node:internal/modules/esm/module_job:137:49)
+2025-08-17T16:07:41.736988759Z Build failed: Command failed: npx vite build
+2025-08-17T16:07:41.741181555Z ==> Build failed 😞
+2025-08-17T16:07:41.741210406Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
