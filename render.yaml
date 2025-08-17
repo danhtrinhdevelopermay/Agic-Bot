@@ -3,7 +3,7 @@ services:
     name: facebook-messenger-bot
     env: node
     plan: free
-    buildCommand: npm ci && npx vite build --config vite.config.prod.ts && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+    buildCommand: npm ci && node build.cjs
     startCommand: npm start
     healthCheckPath: /api/test
     envVars:
