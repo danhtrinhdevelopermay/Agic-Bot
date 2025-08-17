@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: facebook-messenger-bot
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/test
+    envVars:
+      - key: NODE_ENV
+        value: production
