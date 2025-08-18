@@ -197,8 +197,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const signature = req.headers['x-hub-signature-256'] as string;
     console.log('Signature verification:', { signature, hasSignature: !!signature });
     
-    if (!signature || !facebookService.verifySignature(JSON.stringify(req.body), signature)) {
-      console.log('ERROR: Invalid signature');
+    if (!signature) {
+      console.log('ERROR: No signature provided');
+      return res.status(403).json({ error: 'No signature' });
+    }
+    
+    if (!facebookService.verifySignature(JSON.stringify(req.body), signature)) {
+      console.log('ERROR: Invalid signature', { 
+        providedSignature: signature,
+        bodyLength: JSON.stringify(req.body).length,
+        bodyPreview: JSON.stringify(req.body).substring(0, 100)
+      });
       return res.status(403).json({ error: 'Invalid signature' });
     }
 
