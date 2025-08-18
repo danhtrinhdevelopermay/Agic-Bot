@@ -62,6 +62,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize services on startup
   await initializeServices();
 
+  // Diagnostic endpoint to check if bot is configured
+  app.get('/api/health', async (req, res) => {
+    const config = await storage.getBotConfig();
+    
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      configured: !!config,
+      services: {
+        gemini: !!geminiService,
+        facebook: !!facebookService
+      },
+      environment: process.env.NODE_ENV,
+      config: config ? {
+        hasGeminiKey: !!config.geminiApiKey,
+        hasPageToken: !!config.pageAccessToken,
+        hasAppSecret: !!config.appSecret,
+        verifyToken: config.verifyToken
+      } : null
+    });
+  });
+
   // Facebook webhook verification (GET)
   app.get('/api/webhook', async (req, res) => {
     const mode = req.query['hub.mode'];

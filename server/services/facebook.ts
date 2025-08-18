@@ -22,16 +22,28 @@ export class FacebookService {
   }
 
   verifySignature(body: string, signature: string): boolean {
-    const expectedSignature = crypto
-      .createHmac('sha256', this.config.appSecret)
-      .update(body)
-      .digest('hex');
-    
-    const signatureHash = signature.replace('sha256=', '');
-    return crypto.timingSafeEqual(
-      Buffer.from(expectedSignature, 'hex'),
-      Buffer.from(signatureHash, 'hex')
-    );
+    try {
+      const expectedSignature = crypto
+        .createHmac('sha256', this.config.appSecret)
+        .update(body)
+        .digest('hex');
+      
+      const signatureHash = signature.replace('sha256=', '');
+      
+      // Check if both signatures have the same length before comparing
+      if (expectedSignature.length !== signatureHash.length) {
+        console.log(`Signature length mismatch: expected ${expectedSignature.length}, got ${signatureHash.length}`);
+        return false;
+      }
+      
+      return crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, 'hex'),
+        Buffer.from(signatureHash, 'hex')
+      );
+    } catch (error) {
+      console.error('Signature verification error:', error);
+      return false;
+    }
   }
 
   async sendMessage(recipientId: string, message: string): Promise<void> {
