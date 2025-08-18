@@ -84,6 +84,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Test webhook connection endpoint
+  app.post('/api/test-webhook', async (req, res) => {
+    console.log('=== TEST WEBHOOK ===');
+    console.log('Time:', new Date().toISOString());
+    console.log('Headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    
+    if (!facebookService || !geminiService) {
+      console.log('ERROR: Services not configured');
+      return res.status(500).json({ 
+        success: false,
+        error: 'Bot chưa được cấu hình đầy đủ',
+        services: { facebook: !!facebookService, gemini: !!geminiService }
+      });
+    }
+
+    try {
+      console.log('Testing Facebook API connection...');
+      const fbConnection = await facebookService.testConnection();
+      console.log('Facebook API result:', fbConnection);
+      
+      console.log('Testing Gemini API...');
+      const testResponse = await geminiService.generateResponse('Xin chào, đây là tin nhắn test');
+      console.log('Gemini API response length:', testResponse?.length);
+      
+      const result = {
+        success: true,
+        timestamp: new Date().toISOString(),
+        tests: {
+          facebookAPI: fbConnection,
+          geminiAPI: !!testResponse,
+          webhookReceived: true
+        },
+        message: 'Test webhook thành công! Bot sẵn sàng hoạt động.',
+        sampleResponse: testResponse?.substring(0, 100) + '...'
+      };
+      
+      console.log('=== TEST WEBHOOK SUCCESS ===');
+      console.log('Result:', JSON.stringify(result, null, 2));
+      
+      res.json(result);
+      
+    } catch (error) {
+      console.error('Test webhook error:', error);
+      const errorResult = {
+        success: false,
+        error: 'Test thất bại: ' + (error as Error).message,
+        timestamp: new Date().toISOString()
+      };
+      console.log('=== TEST WEBHOOK ERROR ===');
+      console.log('Error result:', JSON.stringify(errorResult, null, 2));
+      res.status(500).json(errorResult);
+    }
+  });
+
   // Facebook webhook verification (GET)
   app.get('/api/webhook', async (req, res) => {
     const mode = req.query['hub.mode'];
