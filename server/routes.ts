@@ -223,7 +223,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const startTime = Date.now();
       
       try {
+        // Mark message as seen immediately
+        await facebookService.markSeen(messageData.senderId);
+        
+        // Show typing indicator while AI is generating response
+        await facebookService.sendTypingOn(messageData.senderId);
+        
         const response = await geminiService.generateResponse(messageData.messageText);
+        
+        // Turn off typing indicator before sending message
+        await facebookService.sendTypingOff(messageData.senderId);
+        
         await facebookService.sendMessage(messageData.senderId, response);
         
         const responseTime = Date.now() - startTime;
@@ -266,6 +276,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       } catch (error) {
         const responseTime = Date.now() - startTime;
+        
+        // Turn off typing indicator on error
+        await facebookService.sendTypingOff(messageData.senderId);
+        
+        // Send error message to user
+        await facebookService.sendMessage(
+          messageData.senderId, 
+          "Xin lỗi, mình gặp lỗi khi xử lý tin nhắn của bạn. Bạn thử lại sau nhé! 😊"
+        );
         
         // Log the error
         await storage.createMessageLog({

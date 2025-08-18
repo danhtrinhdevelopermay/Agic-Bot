@@ -46,6 +46,84 @@ export class FacebookService {
     }
   }
 
+  async sendTypingOn(recipientId: string): Promise<void> {
+    const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${this.config.pageAccessToken}`;
+    
+    const typingData = {
+      recipient: { id: recipientId },
+      sender_action: 'typing_on',
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(typingData),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('Failed to send typing indicator:', error);
+      }
+    } catch (error) {
+      console.error('Failed to send typing indicator:', error);
+    }
+  }
+
+  async sendTypingOff(recipientId: string): Promise<void> {
+    const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${this.config.pageAccessToken}`;
+    
+    const typingData = {
+      recipient: { id: recipientId },
+      sender_action: 'typing_off',
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(typingData),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('Failed to turn off typing indicator:', error);
+      }
+    } catch (error) {
+      console.error('Failed to turn off typing indicator:', error);
+    }
+  }
+
+  async markSeen(recipientId: string): Promise<void> {
+    const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${this.config.pageAccessToken}`;
+    
+    const seenData = {
+      recipient: { id: recipientId },
+      sender_action: 'mark_seen',
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(seenData),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('Failed to mark message as seen:', error);
+      }
+    } catch (error) {
+      console.error('Failed to mark message as seen:', error);
+    }
+  }
+
   async sendMessage(recipientId: string, message: string): Promise<void> {
     const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${this.config.pageAccessToken}`;
     

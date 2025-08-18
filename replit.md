@@ -8,6 +8,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**2025-08-18**: Added professional typing indicators and visual feedback to Messenger bot:
+- Implemented Facebook typing indicators (typing_on/typing_off)
+- Added message seen markers for immediate feedback
+- Enhanced user experience with natural conversation flow
+- Bot now shows "typing..." animation while AI generates responses
+- Improved error handling with graceful typing indicator cleanup
+
 **2025-08-17**: Successfully resolved all deployment issues and created working build pipeline for Render.com:
 - Created `build.cjs` production build script that properly handles both client and server builds
 - Fixed vite configuration conflicts by using existing vite.config.ts with production environment detection
