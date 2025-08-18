@@ -186,6 +186,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('Headers:', JSON.stringify(req.headers, null, 2));
     console.log('Body:', JSON.stringify(req.body, null, 2));
     console.log('Services status:', { facebookService: !!facebookService, geminiService: !!geminiService });
+    console.log('User-Agent:', req.headers['user-agent']);
+    console.log('Content-Type:', req.headers['content-type']);
 
     if (!facebookService || !geminiService) {
       console.log('ERROR: Services not configured');
