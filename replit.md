@@ -8,6 +8,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**2025-08-18**: Fixed image message handling in Facebook Messenger bot:
+- Updated `extractMessageData()` in FacebookService to process image attachments, not just text messages
+- Enhanced bot to detect and respond to image messages with appropriate Vietnamese responses
+- Updated system prompt to better handle image-related conversations
+- Added comprehensive logging for debugging image message processing
+- Bot now responds when users send images instead of staying silent
+
 **2025-08-18**: Added professional typing indicators and visual feedback to Messenger bot:
 - Implemented Facebook typing indicators (typing_on/typing_off)
 - Added message seen markers for immediate feedback

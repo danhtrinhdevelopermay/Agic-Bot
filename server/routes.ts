@@ -219,6 +219,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const messageData = facebookService.extractMessageData(req.body);
     console.log('Extracted message data:', messageData);
     
+    if (messageData && messageData.messageText.includes('[Hình ảnh đã được gửi]')) {
+      console.log('🖼️ IMAGE MESSAGE DETECTED - Processing image message');
+    }
+    
     if (messageData) {
       const startTime = Date.now();
       

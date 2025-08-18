@@ -166,11 +166,36 @@ export class FacebookService {
     if (webhookEvent.object === 'page') {
       for (const entry of webhookEvent.entry) {
         for (const event of entry.messaging) {
-          if (event.message && event.message.text) {
-            return {
-              senderId: event.sender.id,
-              messageText: event.message.text
-            };
+          if (event.message) {
+            // Xử lý tin nhắn văn bản
+            if (event.message.text) {
+              return {
+                senderId: event.sender.id,
+                messageText: event.message.text
+              };
+            }
+            // Xử lý tin nhắn hình ảnh
+            else if (event.message.attachments && event.message.attachments.length > 0) {
+              console.log('📎 Attachments detected:', event.message.attachments);
+              const attachment = event.message.attachments[0];
+              console.log('🔍 Processing attachment:', { type: attachment.type, payloadUrl: attachment.payload?.url });
+              
+              if (attachment.type === 'image') {
+                console.log('🖼️ Image attachment found, processing...');
+                return {
+                  senderId: event.sender.id,
+                  messageText: `[Hình ảnh đã được gửi] - ${attachment.payload?.url || 'Không thể lấy URL hình ảnh'}`
+                };
+              }
+              // Xử lý các loại attachment khác
+              else {
+                console.log(`📁 Non-image attachment: ${attachment.type}`);
+                return {
+                  senderId: event.sender.id,
+                  messageText: `[Đã gửi ${attachment.type}]`
+                };
+              }
+            }
           }
         }
       }

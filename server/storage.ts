@@ -46,7 +46,7 @@ export class MemStorage implements IStorage {
           temperature: process.env.temperature || '0.7',
           maxTokens: parseInt(process.env.maxTokens || '1000'),
           safetySettings: process.env.safetySettings || 'BLOCK_MEDIUM_AND_ABOVE',
-          systemPrompt: process.env.systemPrompt || 'Bạn là trợ lý AI thông minh cho Facebook Messenger. Hãy trả lời bằng tiếng Việt một cách tự nhiên, thân thiện và hữu ích.'
+          systemPrompt: process.env.systemPrompt || 'Bạn là trợ lý AI thông minh cho Facebook Messenger. Hãy trả lời bằng tiếng Việt một cách tự nhiên, thân thiện và hữu ích. Khi người dùng gửi hình ảnh, hãy thể hiện sự quan tâm và đề xuất cách bạn có thể giúp họ phân tích hoặc thảo luận về hình ảnh đó.'
         };
 
         if (envConfig.pageAccessToken && envConfig.appSecret && envConfig.geminiApiKey) {

@@ -21,13 +21,22 @@ export class GeminiService {
     try {
       console.log('Generating response for message:', message.substring(0, 100));
       
+      // Kiểm tra nếu tin nhắn chứa hình ảnh
+      const isImageMessage = message.includes('[Hình ảnh đã được gửi]');
+      let promptMessage = message;
+      
+      if (isImageMessage) {
+        // Tạo prompt đặc biệt cho hình ảnh
+        promptMessage = `Người dùng đã gửi một hình ảnh. Hãy phản hồi một cách thân thiện và hỏi họ muốn bạn giúp gì về hình ảnh này. Bạn có thể đề xuất phân tích, mô tả, hoặc trả lời câu hỏi về hình ảnh. ${message}`;
+      }
+      
       // Simple fetch-based approach for @google/genai v1.14.0
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.config.model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
       
       const payload = {
         contents: [{
           parts: [{
-            text: `${this.config.systemPrompt}\n\nUser: ${message}\n\nAssistant:`
+            text: `${this.config.systemPrompt}\n\nUser: ${promptMessage}\n\nAssistant:`
           }]
         }],
         generationConfig: {
