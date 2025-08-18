@@ -5,7 +5,7 @@ services:
     plan: free
     buildCommand: node build.cjs
     startCommand: npm start
-    healthCheckPath: /api/test
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production

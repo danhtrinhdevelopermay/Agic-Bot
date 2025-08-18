@@ -9,6 +9,7 @@ import RecentLogs from "@/components/recent-logs";
 import SetupGuide from "@/components/setup-guide";
 import TroubleshootingGuide from "@/components/troubleshooting-guide";
 import { WebhookTest } from "@/components/webhook-test";
+import { ProductionConfig } from "@/components/production-config";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Settings, AlertTriangle } from "lucide-react";
 
@@ -81,6 +82,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column: Configuration */}
             <div className="lg:col-span-2 space-y-6">
+              <ProductionConfig />
               <FacebookConfig config={config} />
               <GeminiConfig config={config} />
               <WebhookTest />

@@ -34,6 +34,38 @@ export class MemStorage implements IStorage {
 
   private loadConfig() {
     try {
+      // In production, try to load from environment variables first
+      if (process.env.NODE_ENV === 'production') {
+        const envConfig = {
+          pageAccessToken: process.env.pageAccessToken,
+          appSecret: process.env.appSecret,
+          pageId: process.env.pageId,
+          geminiApiKey: process.env.geminiApiKey,
+          verifyToken: process.env.verifyToken || 'my_verify_token_2024',
+          geminiModel: process.env.geminiModel || 'gemini-2.0-flash-exp',
+          temperature: process.env.temperature || '0.7',
+          maxTokens: parseInt(process.env.maxTokens || '1000'),
+          safetySettings: process.env.safetySettings || 'BLOCK_MEDIUM_AND_ABOVE',
+          systemPrompt: process.env.systemPrompt || 'Bạn là trợ lý AI thông minh cho Facebook Messenger. Hãy trả lời bằng tiếng Việt một cách tự nhiên, thân thiện và hữu ích.'
+        };
+
+        if (envConfig.pageAccessToken && envConfig.appSecret && envConfig.geminiApiKey) {
+          const id = randomUUID();
+          const now = new Date();
+          const config: BotConfig = {
+            ...envConfig,
+            id,
+            createdAt: now,
+            updatedAt: now,
+          };
+          this.botConfigs.set(id, config);
+          this.currentConfigId = id;
+          console.log('Config loaded from environment variables');
+          return;
+        }
+      }
+
+      // Fallback to config file
       if (fs.existsSync(this.configFile)) {
         const configData = JSON.parse(fs.readFileSync(this.configFile, 'utf8'));
         const id = randomUUID();
