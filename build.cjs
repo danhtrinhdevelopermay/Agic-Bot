@@ -2,15 +2,21 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 
 console.log('Starting production build...');
-process.env.NODE_ENV = 'production';
 
 try {
+  // Ensure all dependencies including devDependencies are installed
+  console.log('Installing all dependencies including dev dependencies...');
+  execSync('npm install --include=dev', { 
+    stdio: 'inherit',
+    cwd: process.cwd()
+  });
+
   // Create dist directories
   if (!fs.existsSync('dist')) fs.mkdirSync('dist');
   if (!fs.existsSync('dist/public')) fs.mkdirSync('dist/public');
 
-  // Use the existing vite config but ensure production mode
-  console.log('Building client with existing vite config...');
+  // Build client - set NODE_ENV for build only
+  console.log('Building client...');
   execSync('npx vite build', { 
     stdio: 'inherit',
     cwd: process.cwd(),
