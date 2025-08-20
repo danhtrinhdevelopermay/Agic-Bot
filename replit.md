@@ -8,13 +8,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**2025-08-18**: Added image generation feature using Gemini AI:
-- Created ImageGeneratorService to handle text-to-image requests intelligently
-- Bot can detect image generation requests in Vietnamese and English (keywords: "tạo hình ảnh", "vẽ", "generate image", etc.)
-- Provides detailed image descriptions and improved English prompts for external AI tools
-- Added ImageGeneratorConfig dashboard component for testing and monitoring
-- Integrated with existing Gemini service for seamless text processing
-- Added API endpoint for testing image generation functionality
+**2025-08-20**: Enhanced image generation with FREE real image creation:
+- Integrated Pollinations AI API for completely free image generation without API keys
+- Bot now actually creates and sends real images, not just descriptions
+- Added FreeImageGeneratorService with automatic Vietnamese-to-English translation
+- Users can request "tạo hình ảnh một con mèo" and get actual image URLs
+- Fallback system provides helpful guidance for alternative free tools when API is down
+- Added automatic prompt enhancement and cleaning for better image quality
 
 **2025-08-18**: Fixed image message handling in Facebook Messenger bot:
 - Updated `extractMessageData()` in FacebookService to process image attachments, not just text messages
