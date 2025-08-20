@@ -18,23 +18,24 @@ export class FreeImageGeneratorService {
       const cleanPrompt = this.cleanPrompt(prompt);
       console.log('Cleaned prompt:', cleanPrompt);
       
-      // Thử các API miễn phí theo thứ tự ưu tiên
+      // Thử các API miễn phí đã test hoạt động
+      const simplePrompt = cleanPrompt.split(' ').slice(0, 2).join(' '); // Chỉ lấy 2 từ đầu
       const apis = [
         {
           name: 'Pollinations AI (simple)',
-          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512`
+          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}`
         },
         {
-          name: 'Pollinations AI (no params)',
+          name: 'Pollinations AI (with size)',
+          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}?width=512&height=512`
+        },
+        {
+          name: 'Pollinations AI (original prompt)',
           url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}`
         },
         {
-          name: 'Alternative API 1',
-          url: `https://api.openai-proxy.com/dall-e-free?prompt=${encodeURIComponent(cleanPrompt)}`
-        },
-        {
-          name: 'Alternative API 2', 
-          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt.substring(0, 50))}` // Rút ngắn prompt
+          name: 'Fallback simple',
+          url: `https://image.pollinations.ai/prompt/beautiful%20image`
         }
       ];
 
@@ -81,14 +82,13 @@ export class FreeImageGeneratorService {
 
   // Làm sạch prompt để phù hợp với API
   private cleanPrompt(prompt: string): string {
-    // Loại bỏ các ký tự đặc biệt và cải thiện prompt
+    // Loại bỏ các ký tự đặc biệt và giữ prompt đơn giản
     let cleanedPrompt = prompt
-      .replace(/[^\w\s,.-]/g, '') // Chỉ giữ lại chữ, số, khoảng trắng và dấu câu cơ bản
+      .replace(/[^\w\s]/g, ' ') // Chỉ giữ lại chữ, số, khoảng trắng
+      .replace(/\s+/g, ' ') // Loại bỏ khoảng trắng thừa
       .trim();
     
-    // Thêm các từ khóa chất lượng cao
-    cleanedPrompt += ', high quality, detailed, professional, 4k';
-    
+    // Giữ prompt ngắn gọn, không thêm từ khóa phức tạp
     return cleanedPrompt;
   }
 

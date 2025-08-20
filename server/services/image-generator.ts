@@ -128,11 +128,28 @@ export class ImageGeneratorService {
       'tạo hình ảnh', 'tạo ảnh', 'vẽ', 'vẽ cho tôi', 'tạo ra ảnh',
       'generate image', 'create image', 'draw', 'make picture',
       'design', 'thiết kế', 'hình minh họa', 'illustration',
-      'tạo tranh', 'làm ảnh', 'chụp ảnh', 'tạo hình'
+      'tạo tranh', 'làm ảnh', 'chụp ảnh', 'tạo hình',
+      'hãy tạo ảnh', 'hãy vẽ', 'cho tôi ảnh', 'tạo cho tôi ảnh'
     ];
     
     const lowerMessage = message.toLowerCase();
-    return imageKeywords.some(keyword => lowerMessage.includes(keyword.toLowerCase()));
+    
+    // Kiểm tra từ khóa trực tiếp
+    const hasKeyword = imageKeywords.some(keyword => lowerMessage.includes(keyword.toLowerCase()));
+    
+    if (hasKeyword) {
+      return true;
+    }
+    
+    // Kiểm tra pattern: "tạo/draw/make + anything"
+    const patterns = [
+      /tạo.*?(ảnh|hình|tranh)/i,
+      /vẽ.*?(ảnh|hình|tranh|cho)/i,
+      /(draw|create|make|generate).*(image|picture|photo)/i,
+      /hình.*?(con mèo|con chó|cảnh|người)/i
+    ];
+    
+    return patterns.some(pattern => pattern.test(message));
   }
 
   // Trích xuất prompt từ tin nhắn

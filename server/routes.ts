@@ -610,6 +610,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test image URLs directly  
+  app.post('/api/test-image-url', async (req, res) => {
+    try {
+      const { prompt = 'cute cat' } = req.body;
+      
+      // Test các URL để tìm cái hoạt động tốt nhất
+      const testUrls = [
+        `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`,
+        `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512`,
+        `https://picsum.photos/512/512?random=${Math.floor(Math.random() * 1000)}`,
+        'https://via.placeholder.com/512x512/0066CC/FFFFFF?text=Test+Image'
+      ];
+
+      const results = [];
+      for (const url of testUrls) {
+        try {
+          const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+          results.push({
+            url: url,
+            status: response.status,
+            ok: response.ok,
+            contentType: response.headers.get('content-type')
+          });
+        } catch (error) {
+          results.push({
+            url: url,
+            status: 'error',
+            error: error instanceof Error ? error.message : String(error)
+          });
+        }
+      }
+
+      res.json({ 
+        success: true,
+        prompt: prompt,
+        results: results,
+        working: results.filter(r => r.ok)
+      });
+      
+    } catch (error) {
+      res.status(500).json({ error: 'Test failed', details: String(error) });
+    }
+  });
+
   // Test Facebook image sending directly
   app.post('/api/test-facebook-image', async (req, res) => {
     try {
