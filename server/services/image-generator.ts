@@ -28,14 +28,10 @@ export class ImageGeneratorService {
       const imageResult = await this.freeImageGenerator.generateImageURL(englishPrompt);
       
       if (imageResult.success && imageResult.imageUrl) {
-        // Tạo thành công - tạo tin nhắn kèm link hình ảnh
-        const successMessage = `🎨 Đây là hình ảnh tôi vừa tạo cho bạn dựa trên mô tả "${prompt}":
+        // Tạo thành công - trả về thông tin để gửi hình ảnh trực tiếp
+        const successMessage = `🎨 Đây là hình ảnh tôi vừa tạo cho bạn dựa trên mô tả "${prompt}"!
 
-${imageResult.imageUrl}
-
-✨ Hình ảnh được tạo bằng AI hoàn toàn miễn phí! Bạn có thể click vào link trên để xem và tải về.
-
-Nếu bạn muốn tạo thêm hình ảnh khác hoặc điều chỉnh, hãy cho tôi biết nhé! 😊`;
+✨ Hình ảnh được tạo bằng AI hoàn toàn miễn phí! Nếu bạn muốn tạo thêm hình ảnh khác hoặc điều chỉnh, hãy cho tôi biết nhé! 😊`;
 
         return {
           success: true,

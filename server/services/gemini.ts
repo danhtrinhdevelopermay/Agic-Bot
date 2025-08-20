@@ -23,7 +23,7 @@ export class GeminiService {
     });
   }
 
-  async generateResponse(message: string): Promise<string> {
+  async generateResponse(message: string): Promise<{ text: string; imageUrl?: string; isImageGeneration?: boolean }> {
     try {
       console.log('Generating response for message:', message.substring(0, 100));
       
@@ -34,7 +34,11 @@ export class GeminiService {
         console.log('Extracted image prompt:', imagePrompt);
         
         const result = await this.imageGenerator.generateImage(imagePrompt);
-        return result.message;
+        return {
+          text: result.message,
+          imageUrl: result.imageUrl,
+          isImageGeneration: true
+        };
       }
       
       // Kiểm tra nếu tin nhắn chứa hình ảnh
@@ -77,7 +81,7 @@ export class GeminiService {
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Xin lỗi, mình không thể tạo phản hồi lúc này.";
       
       console.log('Generated response:', text.substring(0, 100));
-      return text;
+      return { text };
     } catch (error) {
       console.error("Gemini API error:", error);
       throw new Error(`Failed to generate response: ${error}`);

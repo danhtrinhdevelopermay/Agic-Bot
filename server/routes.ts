@@ -107,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Testing Gemini API...');
       const testResponse = await geminiService.generateResponse('Xin chào, đây là tin nhắn test');
-      console.log('Gemini API response length:', testResponse?.length);
+      console.log('Gemini API response length:', testResponse?.text?.length);
       
       const result = {
         success: true,
@@ -118,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           webhookReceived: true
         },
         message: 'Test webhook thành công! Bot sẵn sàng hoạt động.',
-        sampleResponse: testResponse?.substring(0, 100) + '...'
+        sampleResponse: testResponse?.text?.substring(0, 100) + '...'
       };
       
       console.log('=== TEST WEBHOOK SUCCESS ===');
@@ -238,7 +238,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Turn off typing indicator before sending message
         await facebookService.sendTypingOff(messageData.senderId);
         
-        await facebookService.sendMessage(messageData.senderId, response);
+        // Check if this is an image generation request
+        if (response.isImageGeneration && response.imageUrl) {
+          console.log('📸 Sending image directly to user:', response.imageUrl);
+          await facebookService.sendImageMessage(messageData.senderId, response.imageUrl, response.text);
+        } else {
+          await facebookService.sendMessage(messageData.senderId, response.text);
+        }
         
         const responseTime = Date.now() - startTime;
         
@@ -246,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createMessageLog({
           senderId: messageData.senderId,
           messageText: messageData.messageText,
-          responseText: response,
+          responseText: response.text,
           responseTime,
           success: true,
         });
@@ -422,7 +428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const response = await geminiService.generateResponse(message);
-      res.json({ response });
+      res.json({ response: response.text });
     } catch (error) {
       res.status(500).json({ error: 'Failed to generate response' });
     }
@@ -481,7 +487,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ 
         success: true, 
-        response,
+        response: response.text,
+        imageUrl: response.imageUrl,
+        isImageGeneration: response.isImageGeneration,
         message: 'Image generation test completed'
       });
     } catch (error) {

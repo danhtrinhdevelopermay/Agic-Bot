@@ -151,6 +151,46 @@ export class FacebookService {
     }
   }
 
+  async sendImageMessage(recipientId: string, imageUrl: string, caption?: string): Promise<void> {
+    const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${this.config.pageAccessToken}`;
+    
+    const messageData = {
+      recipient: { id: recipientId },
+      message: {
+        attachment: {
+          type: "image",
+          payload: {
+            url: imageUrl,
+            is_reusable: false
+          }
+        }
+      }
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Facebook API error: ${error}`);
+      }
+
+      // Nếu có caption, gửi thêm tin nhắn văn bản
+      if (caption) {
+        await this.sendMessage(recipientId, caption);
+      }
+    } catch (error) {
+      console.error('Failed to send image:', error);
+      throw error;
+    }
+  }
+
   async testConnection(): Promise<boolean> {
     try {
       const url = `https://graph.facebook.com/v18.0/${this.config.pageId}?access_token=${this.config.pageAccessToken}`;
