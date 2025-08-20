@@ -154,6 +154,8 @@ export class FacebookService {
   async sendImageMessage(recipientId: string, imageUrl: string, caption?: string): Promise<void> {
     const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${this.config.pageAccessToken}`;
     
+    console.log('Attempting to send image:', imageUrl);
+    
     const messageData = {
       recipient: { id: recipientId },
       message: {
@@ -168,6 +170,8 @@ export class FacebookService {
     };
 
     try {
+      console.log('Sending image message data:', JSON.stringify(messageData, null, 2));
+      
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -178,11 +182,16 @@ export class FacebookService {
 
       if (!response.ok) {
         const error = await response.text();
+        console.error('Facebook image API error response:', error);
         throw new Error(`Facebook API error: ${error}`);
       }
 
+      const result = await response.json();
+      console.log('Image sent successfully:', result);
+
       // Nếu có caption, gửi thêm tin nhắn văn bản
       if (caption) {
+        console.log('Sending caption:', caption.substring(0, 100));
         await this.sendMessage(recipientId, caption);
       }
     } catch (error) {

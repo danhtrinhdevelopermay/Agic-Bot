@@ -16,24 +16,58 @@ export class FreeImageGeneratorService {
       
       // Làm sạch và cải thiện prompt
       const cleanPrompt = this.cleanPrompt(prompt);
+      console.log('Cleaned prompt:', cleanPrompt);
       
-      // Sử dụng Pollinations API - hoàn toàn miễn phí, không cần API key
-      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512&model=flux`;
-      
-      console.log('Free image URL generated:', pollinationsUrl);
-      
-      // Kiểm tra xem URL có hoạt động không
-      const testResponse = await fetch(pollinationsUrl, { method: 'HEAD' });
-      if (!testResponse.ok) {
-        throw new Error(`Pollinations API responded with ${testResponse.status}`);
+      // Thử các API miễn phí theo thứ tự ưu tiên
+      const apis = [
+        {
+          name: 'Pollinations AI',
+          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512&model=flux&nologo=true`
+        },
+        {
+          name: 'Pollinations AI (basic)',
+          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512&nologo=true`
+        },
+        {
+          name: 'Pollinations AI (simple)',
+          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}`
+        }
+      ];
+
+      for (const api of apis) {
+        try {
+          console.log(`Trying ${api.name}:`, api.url);
+          
+          // Thử tạo một request đơn giản
+          const testResponse = await fetch(api.url, { 
+            method: 'HEAD',
+            signal: AbortSignal.timeout(8000) // 8s timeout
+          });
+          
+          if (testResponse.ok || testResponse.status === 405) { // 405 = Method Not Allowed, nhưng GET có thể hoạt động
+            console.log(`${api.name} responded successfully`);
+            return {
+              success: true,
+              imageUrl: api.url
+            };
+          }
+          
+          console.log(`${api.name} responded with status:`, testResponse.status);
+        } catch (apiError) {
+          console.log(`${api.name} failed:`, apiError);
+          continue; // Thử API tiếp theo
+        }
       }
       
+      // Nếu tất cả API đều thất bại, vẫn trả về URL đầu tiên
+      console.log('All APIs failed, returning first URL anyway');
       return {
         success: true,
-        imageUrl: pollinationsUrl
+        imageUrl: apis[0].url
       };
+      
     } catch (error) {
-      console.error('Free image generation failed:', error);
+      console.error('Free image generation completely failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'

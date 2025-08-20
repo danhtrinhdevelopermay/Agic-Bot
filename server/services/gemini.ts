@@ -29,16 +29,26 @@ export class GeminiService {
       
       // Kiểm tra nếu tin nhắn là yêu cầu tạo hình ảnh
       if (ImageGeneratorService.detectImageRequest(message)) {
-        console.log('🎨 IMAGE GENERATION REQUEST DETECTED');
+        console.log('🎨 IMAGE GENERATION REQUEST DETECTED for message:', message);
         const imagePrompt = ImageGeneratorService.extractImagePrompt(message);
         console.log('Extracted image prompt:', imagePrompt);
         
-        const result = await this.imageGenerator.generateImage(imagePrompt);
-        return {
-          text: result.message,
-          imageUrl: result.imageUrl,
-          isImageGeneration: true
-        };
+        try {
+          const result = await this.imageGenerator.generateImage(imagePrompt);
+          console.log('Image generation result:', { success: result.success, hasImageUrl: !!result.imageUrl });
+          
+          return {
+            text: result.message,
+            imageUrl: result.imageUrl,
+            isImageGeneration: true
+          };
+        } catch (error) {
+          console.error('Image generation failed in gemini service:', error);
+          return {
+            text: "Xin lỗi, mình gặp lỗi khi tạo hình ảnh. Bạn có thể thử lại sau hoặc sử dụng các công cụ AI miễn phí như Bing Image Creator nhé! 😊",
+            isImageGeneration: false
+          };
+        }
       }
       
       // Kiểm tra nếu tin nhắn chứa hình ảnh

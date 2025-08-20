@@ -241,7 +241,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Check if this is an image generation request
         if (response.isImageGeneration && response.imageUrl) {
           console.log('📸 Sending image directly to user:', response.imageUrl);
-          await facebookService.sendImageMessage(messageData.senderId, response.imageUrl, response.text);
+          try {
+            // Gửi hình ảnh trước
+            await facebookService.sendImageMessage(messageData.senderId, response.imageUrl);
+            // Sau đó gửi caption
+            await facebookService.sendMessage(messageData.senderId, response.text);
+          } catch (imageError) {
+            console.error('Failed to send image, sending text only:', imageError);
+            // Fallback: chỉ gửi text nếu gửi hình không thành công
+            await facebookService.sendMessage(messageData.senderId, response.text + `\n\n🔗 Link hình ảnh: ${response.imageUrl}`);
+          }
         } else {
           await facebookService.sendMessage(messageData.senderId, response.text);
         }
@@ -483,14 +492,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('Testing image generation with message:', message);
+      console.log('Step 1: Calling gemini service...');
+      
       const response = await geminiService.generateResponse(message);
+      console.log('Step 2: Gemini response received:', {
+        hasText: !!response.text,
+        hasImageUrl: !!response.imageUrl,
+        isImageGeneration: response.isImageGeneration,
+        textLength: response.text?.length || 0
+      });
+      
+      // Test the image URL if it exists
+      if (response.imageUrl) {
+        console.log('Step 3: Testing image URL:', response.imageUrl);
+        try {
+          const imageTest = await fetch(response.imageUrl, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+          console.log('Image URL test result:', imageTest.status, imageTest.ok);
+        } catch (imgError) {
+          console.log('Image URL test failed:', imgError);
+        }
+      }
       
       res.json({ 
         success: true, 
         response: response.text,
         imageUrl: response.imageUrl,
         isImageGeneration: response.isImageGeneration,
-        message: 'Image generation test completed'
+        message: 'Image generation test completed',
+        debug: {
+          messageDetected: true,
+          hasImageUrl: !!response.imageUrl,
+          textLength: response.text?.length || 0
+        }
       });
     } catch (error) {
       console.error('Image generation test failed:', error);
