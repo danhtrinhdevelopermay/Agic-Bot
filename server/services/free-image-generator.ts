@@ -21,16 +21,20 @@ export class FreeImageGeneratorService {
       // Thử các API miễn phí theo thứ tự ưu tiên
       const apis = [
         {
-          name: 'Pollinations AI',
-          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512&model=flux&nologo=true`
-        },
-        {
-          name: 'Pollinations AI (basic)',
-          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512&nologo=true`
-        },
-        {
           name: 'Pollinations AI (simple)',
+          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512`
+        },
+        {
+          name: 'Pollinations AI (no params)',
           url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}`
+        },
+        {
+          name: 'Alternative API 1',
+          url: `https://api.openai-proxy.com/dall-e-free?prompt=${encodeURIComponent(cleanPrompt)}`
+        },
+        {
+          name: 'Alternative API 2', 
+          url: `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt.substring(0, 50))}` // Rút ngắn prompt
         }
       ];
 
@@ -90,18 +94,27 @@ export class FreeImageGeneratorService {
 
   // Tạo prompt tiếng Anh từ mô tả tiếng Việt
   async translateToEnglish(vietnamesePrompt: string): Promise<string> {
-    // Các từ cơ bản dịch nhanh
+    console.log('Original Vietnamese prompt:', vietnamesePrompt);
+    
+    // Các từ cơ bản dịch nhanh - thứ tự từ dài đến ngắn để tránh conflict
     const quickTranslations: { [key: string]: string } = {
+      'một con mèo': 'a cat',
       'con mèo': 'cat',
+      'một con chó': 'a dog', 
       'con chó': 'dog',
       'dễ thương': 'cute',
+      'xinh đẹp': 'beautiful',
       'đẹp': 'beautiful',
       'cảnh đẹp': 'beautiful landscape',
       'hoàng hôn': 'sunset',
       'bình minh': 'sunrise',
+      'biển cả': 'ocean',
       'biển': 'ocean',
+      'núi non': 'mountain',
       'núi': 'mountain',
+      'rừng cây': 'forest',
       'rừng': 'forest',
+      'bông hoa': 'flowers',
       'hoa': 'flowers',
       'thành phố': 'city',
       'tương lai': 'futuristic',
@@ -111,18 +124,34 @@ export class FreeImageGeneratorService {
       'vẽ tranh': 'painting',
       'phong cách': 'style',
       'màu sắc': 'colorful',
-      'sáng tạo': 'creative'
+      'sáng tạo': 'creative',
+      'một': 'a',
+      'của': 'of',
+      'và': 'and',
+      'với': 'with'
     };
 
-    let translatedPrompt = vietnamesePrompt.toLowerCase();
+    let translatedPrompt = vietnamesePrompt.toLowerCase().trim();
     
-    // Dịch các từ cơ bản
-    for (const [vietnamese, english] of Object.entries(quickTranslations)) {
-      translatedPrompt = translatedPrompt.replace(new RegExp(vietnamese, 'g'), english);
+    // Dịch từng cụm từ (từ dài đến ngắn để tránh xung đột)
+    const sortedTranslations = Object.entries(quickTranslations)
+      .sort(([a], [b]) => b.length - a.length);
+    
+    for (const [vietnamese, english] of sortedTranslations) {
+      const regex = new RegExp(vietnamese, 'gi');
+      translatedPrompt = translatedPrompt.replace(regex, english);
     }
     
-    // Nếu vẫn còn tiếng Việt, giữ nguyên và thêm mô tả
-    if (/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(translatedPrompt)) {
+    // Làm sạch kết quả
+    translatedPrompt = translatedPrompt
+      .replace(/\s+/g, ' ') // Loại bỏ khoảng trắng thừa
+      .trim();
+    
+    console.log('Translated prompt:', translatedPrompt);
+    
+    // Nếu vẫn còn tiếng Việt hoặc kết quả rỗng, fallback
+    if (!translatedPrompt || /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(translatedPrompt)) {
+      console.log('Fallback: using original prompt with enhancement');
       return `${vietnamesePrompt}, beautiful, high quality, detailed`;
     }
     

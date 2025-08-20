@@ -154,7 +154,28 @@ export class FacebookService {
   async sendImageMessage(recipientId: string, imageUrl: string, caption?: string): Promise<void> {
     const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${this.config.pageAccessToken}`;
     
-    console.log('Attempting to send image:', imageUrl);
+    console.log('📸 Facebook API: Attempting to send image');
+    console.log('Recipient ID:', recipientId);
+    console.log('Image URL:', imageUrl);
+    
+    // Validate URL trước khi gửi
+    try {
+      console.log('🔍 Pre-validating image URL...');
+      const testResponse = await fetch(imageUrl, { method: 'HEAD', signal: AbortSignal.timeout(10000) });
+      console.log('URL validation result:', { status: testResponse.status, contentType: testResponse.headers.get('content-type') });
+      
+      if (!testResponse.ok) {
+        throw new Error(`Image URL validation failed: ${testResponse.status}`);
+      }
+      
+      const contentType = testResponse.headers.get('content-type');
+      if (!contentType?.startsWith('image/')) {
+        throw new Error(`URL does not return image content: ${contentType}`);
+      }
+    } catch (urlError) {
+      console.error('❌ Image URL validation failed:', urlError);
+      throw new Error(`Invalid image URL: ${urlError instanceof Error ? urlError.message : String(urlError)}`);
+    }
     
     const messageData = {
       recipient: { id: recipientId },
@@ -170,6 +191,10 @@ export class FacebookService {
     };
 
     try {
+      // Thêm timeout cho request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+      
       console.log('Sending image message data:', JSON.stringify(messageData, null, 2));
       
       const response = await fetch(url, {
@@ -178,12 +203,19 @@ export class FacebookService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(messageData),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const error = await response.text();
-        console.error('Facebook image API error response:', error);
-        throw new Error(`Facebook API error: ${error}`);
+        console.error('Facebook image API error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: error
+        });
+        throw new Error(`Facebook API error: ${response.status} - ${error}`);
       }
 
       const result = await response.json();

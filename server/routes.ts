@@ -240,18 +240,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Check if this is an image generation request
         if (response.isImageGeneration && response.imageUrl) {
-          console.log('📸 Sending image directly to user:', response.imageUrl);
+          console.log('📸 DETECTED IMAGE GENERATION - Sending image directly to user');
+          console.log('Image URL:', response.imageUrl);
+          console.log('Image response text:', response.text.substring(0, 100));
+          
           try {
+            console.log('Step 1: Attempting to send image via Facebook API...');
             // Gửi hình ảnh trước
             await facebookService.sendImageMessage(messageData.senderId, response.imageUrl);
+            console.log('Step 2: Image sent successfully! Now sending caption...');
+            
             // Sau đó gửi caption
             await facebookService.sendMessage(messageData.senderId, response.text);
+            console.log('Step 3: Caption sent successfully!');
+            
           } catch (imageError) {
-            console.error('Failed to send image, sending text only:', imageError);
+            console.error('❌ FAILED to send image, sending text+link fallback:', imageError);
             // Fallback: chỉ gửi text nếu gửi hình không thành công
             await facebookService.sendMessage(messageData.senderId, response.text + `\n\n🔗 Link hình ảnh: ${response.imageUrl}`);
           }
         } else {
+          console.log('📝 Regular text response, sending message normally');
           await facebookService.sendMessage(messageData.senderId, response.text);
         }
         
@@ -478,7 +487,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test image generation endpoint
+  // Test webhook simulation for image generation
+  app.post('/api/test-webhook-image', async (req, res) => {
+    console.log('=== SIMULATING WEBHOOK IMAGE GENERATION ===');
+    
+    // Mô phỏng webhook data từ Facebook
+    const mockWebhookData = {
+      object: 'page',
+      entry: [
+        {
+          messaging: [
+            {
+              sender: { id: 'test_user_123' },
+              message: { text: 'tạo hình ảnh một con mèo dễ thương' }
+            }
+          ]
+        }
+      ]
+    };
+    
+    try {
+      if (!facebookService || !geminiService) {
+        return res.status(500).json({ error: 'Services not configured' });
+      }
+
+      const messageData = facebookService.extractMessageData(mockWebhookData);
+      if (!messageData) {
+        return res.status(400).json({ error: 'No valid message data' });
+      }
+
+      console.log('Extracted message data:', messageData);
+      
+      const response = await geminiService.generateResponse(messageData.messageText);
+      console.log('Generated response:', {
+        hasText: !!response.text,
+        hasImageUrl: !!response.imageUrl,
+        isImageGeneration: response.isImageGeneration
+      });
+
+      // Mô phỏng logic gửi tin nhắn như webhook thật
+      if (response.isImageGeneration && response.imageUrl) {
+        console.log('📸 WEBHOOK SIMULATION: Image generation detected');
+        // Không gửi thật vì đây là test, chỉ log
+        console.log('Would send image:', response.imageUrl);
+        console.log('Would send caption:', response.text.substring(0, 100));
+        
+        res.json({
+          success: true,
+          message: 'Webhook simulation completed - image would be sent',
+          imageUrl: response.imageUrl,
+          captionText: response.text,
+          simulation: true
+        });
+      } else {
+        res.json({
+          success: true,
+          message: 'Webhook simulation completed - text would be sent',
+          textResponse: response.text,
+          simulation: true
+        });
+      }
+      
+    } catch (error) {
+      console.error('Webhook simulation error:', error);
+      res.status(500).json({ error: 'Simulation failed' });
+    }
+  });
+
+  // Test image generation endpoint  
   app.post('/api/test-image-generation', async (req, res) => {
     try {
       const { message } = req.body;
@@ -529,6 +605,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Image generation test failed:', error);
       res.status(500).json({ 
         error: 'Image generation test failed',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Test Facebook image sending directly
+  app.post('/api/test-facebook-image', async (req, res) => {
+    try {
+      const { imageUrl = 'https://image.pollinations.ai/prompt/cat%20cute?width=512&height=512' } = req.body;
+      
+      if (!facebookService) {
+        return res.status(500).json({ error: 'Facebook service not configured' });
+      }
+
+      console.log('Testing Facebook image sending...');
+      
+      // Use test recipient ID (your own Facebook ID for testing)
+      const testRecipientId = 'YOUR_FACEBOOK_ID'; // Replace with actual ID for testing
+      
+      await facebookService.sendImageMessage(testRecipientId, imageUrl, 'Test image from bot');
+      
+      res.json({ 
+        success: true, 
+        message: 'Image sent successfully',
+        imageUrl: imageUrl
+      });
+      
+    } catch (error) {
+      console.error('Facebook image test failed:', error);
+      res.status(500).json({ 
+        error: 'Failed to send image via Facebook',
         details: error instanceof Error ? error.message : String(error)
       });
     }
