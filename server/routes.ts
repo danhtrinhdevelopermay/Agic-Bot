@@ -463,6 +463,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test image generation endpoint
+  app.post('/api/test-image-generation', async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      if (!geminiService) {
+        return res.status(500).json({ error: 'Gemini service not configured' });
+      }
+
+      console.log('Testing image generation with message:', message);
+      const response = await geminiService.generateResponse(message);
+      
+      res.json({ 
+        success: true, 
+        response,
+        message: 'Image generation test completed'
+      });
+    } catch (error) {
+      console.error('Image generation test failed:', error);
+      res.status(500).json({ 
+        error: 'Image generation test failed',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

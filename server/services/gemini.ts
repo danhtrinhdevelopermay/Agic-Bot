@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { ImageGeneratorService } from "./image-generator.js";
 
 export interface GeminiConfig {
   model: string;
@@ -11,15 +12,30 @@ export interface GeminiConfig {
 export class GeminiService {
   private genAI: GoogleGenAI;
   private config: GeminiConfig;
+  private imageGenerator: ImageGeneratorService;
 
   constructor(config: GeminiConfig) {
     this.config = config;
     this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+    this.imageGenerator = new ImageGeneratorService({
+      geminiApiKey: process.env.GEMINI_API_KEY || "",
+      model: config.model
+    });
   }
 
   async generateResponse(message: string): Promise<string> {
     try {
       console.log('Generating response for message:', message.substring(0, 100));
+      
+      // Kiểm tra nếu tin nhắn là yêu cầu tạo hình ảnh
+      if (ImageGeneratorService.detectImageRequest(message)) {
+        console.log('🎨 IMAGE GENERATION REQUEST DETECTED');
+        const imagePrompt = ImageGeneratorService.extractImagePrompt(message);
+        console.log('Extracted image prompt:', imagePrompt);
+        
+        const result = await this.imageGenerator.generateImage(imagePrompt);
+        return result.message;
+      }
       
       // Kiểm tra nếu tin nhắn chứa hình ảnh
       const isImageMessage = message.includes('[Hình ảnh đã được gửi]');

@@ -46,7 +46,7 @@ export class MemStorage implements IStorage {
           temperature: process.env.temperature || '0.7',
           maxTokens: parseInt(process.env.maxTokens || '1000'),
           safetySettings: process.env.safetySettings || 'BLOCK_MEDIUM_AND_ABOVE',
-          systemPrompt: process.env.systemPrompt || 'Bạn là trợ lý AI thông minh cho Facebook Messenger. Hãy trả lời bằng tiếng Việt một cách tự nhiên, thân thiện và hữu ích. Khi người dùng gửi hình ảnh, hãy thể hiện sự quan tâm và đề xuất cách bạn có thể giúp họ phân tích hoặc thảo luận về hình ảnh đó.'
+          systemPrompt: process.env.systemPrompt || 'Bạn là trợ lý AI thông minh cho Facebook Messenger. Hãy trả lời bằng tiếng Việt một cách tự nhiên, thân thiện và hữu ích. Khi người dùng gửi hình ảnh, hãy thể hiện sự quan tâm và đề xuất cách bạn có thể giúp họ phân tích hoặc thảo luận về hình ảnh đó. Khi người dùng yêu cầu tạo hình ảnh, hãy mô tả chi tiết những gì họ muốn tạo và đưa ra gợi ý prompt tiếng Anh cải thiện để sử dụng với các công cụ AI tạo hình ảnh.'
         };
 
         if (envConfig.pageAccessToken && envConfig.appSecret && envConfig.geminiApiKey) {
@@ -57,6 +57,7 @@ export class MemStorage implements IStorage {
             id,
             createdAt: now,
             updatedAt: now,
+            isActive: true,
           };
           this.botConfigs.set(id, config);
           this.currentConfigId = id;

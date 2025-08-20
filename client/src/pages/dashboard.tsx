@@ -10,6 +10,7 @@ import SetupGuide from "@/components/setup-guide";
 import TroubleshootingGuide from "@/components/troubleshooting-guide";
 import { WebhookTest } from "@/components/webhook-test";
 import { ProductionConfig } from "@/components/production-config";
+import { ImageGeneratorConfig } from "@/components/image-generator-config";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Settings, AlertTriangle } from "lucide-react";
 
@@ -85,6 +86,7 @@ export default function Dashboard() {
               <ProductionConfig />
               <FacebookConfig config={config} />
               <GeminiConfig config={config} />
+              <ImageGeneratorConfig />
               <WebhookTest />
               <MessageTesting />
             </div>
